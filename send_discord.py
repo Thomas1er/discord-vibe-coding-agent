@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 CHANNELS = {
-    'galery': 1501216807447560284, 
+    'gallery': 1501216807447560284, 
     'database': 1501216853769453752,
     'control': 1501216354446086274
 }
@@ -30,7 +30,17 @@ async def notify(channel_key, message, file_path=None):
 
 if __name__ == "__main__":
     # Usage: ./send_discord.py gallery "Message" "chemin/image.png"
+    if len(sys.argv) < 3:
+        print("Usage: ./send_discord.py <channel_key> <message> [file_path]")
+        sys.exit(1)
+        
     chan = sys.argv[1]
     msg = sys.argv[2]
     img = sys.argv[3] if len(sys.argv) > 3 else None
+    
+    token = os.getenv("DISCORD_TOKEN")
+    if not token:
+        print("Erreur: DISCORD_TOKEN manquant. Vérifiez votre fichier .env.")
+        sys.exit(1)
+        
     asyncio.run(notify(chan, msg, img))

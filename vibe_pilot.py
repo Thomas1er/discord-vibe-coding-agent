@@ -8,6 +8,8 @@ import io
 import json
 import re
 import shutil
+from dotenv import load_dotenv
+from openai import OpenAI
 
 # Utility functions for the Vibe Pilot Brain
 
@@ -15,16 +17,26 @@ def read_file(relative_path: str) -> str:
     """Read the content of a file relative to BASE_DIR.
     Returns the file content as a string, or an empty string if the file does not exist.
     """
-    file_path = os.path.join(BASE_DIR, relative_path)
+    file_path = os.path.abspath(os.path.join(BASE_DIR, relative_path))
+    # Sécurité : vérifier que le fichier est bien dans BASE_DIR
+    if not file_path.startswith(os.path.abspath(BASE_DIR)):
+        return "Erreur de sécurité : Accès interdit en dehors du projet."
+        
     try:
-        with open(file_path, "r") as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
         return "Erreur : Fichier introuvable."
+    except UnicodeDecodeError:
+        return "Erreur : Ce fichier est binaire et ne peut pas être lu sous forme de texte."
 
 def write_file(relative_path: str, content: str) -> str:
     """Write content to a file relative to BASE_DIR and backup the old version."""
-    file_path = os.path.join(BASE_DIR, relative_path)
+    file_path = os.path.abspath(os.path.join(BASE_DIR, relative_path))
+    # Sécurité : vérifier que le fichier est bien dans BASE_DIR
+    if not file_path.startswith(os.path.abspath(BASE_DIR)):
+        return "Erreur de sécurité : Accès interdit en dehors du projet."
+        
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     
     # Création d'un backup automatique
@@ -36,13 +48,16 @@ def write_file(relative_path: str, content: str) -> str:
         backup_path = os.path.join(backup_dir, safe_name)
         shutil.copy2(file_path, backup_path)
         
-    with open(file_path, "w") as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
     return f"Fichier {relative_path} écrit avec succès (backup créé dans .vibe_backups)."
 
 def get_project_tree(relative_path: str = "") -> str:
     """Retourne l'arborescence du dossier sous forme de texte (profondeur max 2)."""
-    abs_path = os.path.join(BASE_DIR, relative_path)
+    abs_path = os.path.abspath(os.path.join(BASE_DIR, relative_path))
+    if not abs_path.startswith(os.path.abspath(BASE_DIR)):
+        return "Erreur de sécurité : Accès interdit en dehors du projet."
+        
     if not os.path.exists(abs_path):
         return f"Erreur: Dossier '{relative_path}' introuvable."
     
@@ -179,7 +194,8 @@ async def exec_shell_interactive(ctx, command: str) -> str:
     process = await asyncio.create_subprocess_shell(
         command,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        stderr=asyncio.subprocess.PIPE,
+        cwd=BASE_DIR
     )
     
     output_log = []
@@ -351,7 +367,17 @@ async def vibe(ctx, *, instructions: str):
                 
             for tool_call in message.tool_calls:
                 func_name = tool_call.function.name
-                args = json.loads(tool_call.function.arguments)
+                
+                try:
+                    args = json.loads(tool_call.function.arguments)
+                except json.JSONDecodeError:
+                    # On informe l'IA de son erreur de formatage pour qu'elle corrige
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": "Erreur interne: JSON invalide fourni dans les arguments. Réessaie ou utilise les blocs texte FILE:."
+                    })
+                    continue
                 
                 # Masquer le contenu complet s'il est trop long pour l'affichage Discord
                 display_args = str(args)
