@@ -25,7 +25,7 @@ Pour faire fonctionner votre propre instance de Vibe Pilot :
    DEEPSEEK_API_KEY=votre_cle_api_deepseek_ici
    ```
 3. Installez les dépendances : `pip install discord.py python-dotenv openai`
-4. Lancez le bot : `python vibe_pilot.py`
+4. Lancez le bot : `./start.sh`
 
 ---
 
