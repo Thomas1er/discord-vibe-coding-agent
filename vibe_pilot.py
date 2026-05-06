@@ -302,7 +302,24 @@ async def reset(ctx):
         await ctx.send("🧹 **La mémoire est déjà vide** pour ce channel.")
 
 @bot.command()
-async def vibe(ctx, *, instructions: str):
+async def vibe(ctx, *, instructions: str = None):
+    instructions = instructions or ""
+    
+    # Prise en compte des fichiers .txt en pièce jointe pour contourner la limite Discord
+    if ctx.message.attachments:
+        for attachment in ctx.message.attachments:
+            if attachment.filename.endswith('.txt'):
+                try:
+                    file_bytes = await attachment.read()
+                    text_content = file_bytes.decode('utf-8')
+                    instructions += f"\n\n[Contenu de la pièce jointe : {attachment.filename}]\n{text_content}"
+                except Exception as e:
+                    await ctx.send(f"⚠️ Impossible de lire le fichier `{attachment.filename}` : {e}")
+                    
+    if not instructions.strip():
+        await ctx.send("❌ Tu dois fournir des instructions (soit dans le message, soit via un fichier .txt joint).")
+        return
+
     await ctx.send("🤖 **Agent activé**. Analyse de l'environnement et lancement...")
     
     channel_id = ctx.channel.id
