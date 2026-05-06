@@ -4,6 +4,32 @@
 
 ---
 
+## 🛠️ Installation & Configuration
+
+Pour faire fonctionner votre propre instance de Vibe Pilot :
+
+### 1. Prérequis sur le Discord Developer Portal
+1. Rendez-vous sur le [Discord Developer Portal](https://discord.com/developers/applications).
+2. Créez une "New Application" et allez dans l'onglet **Bot**.
+3. **IMPORTANT** : Dans la section "Privileged Gateway Intents", activez :
+   - **Presence Intent**
+   - **Server Members Intent**
+   - **Message Content Intent** (Indispensable pour lire vos commandes).
+4. Récupérez votre **Token** (cliquez sur "Reset Token" si nécessaire).
+
+### 2. Configuration locale
+1. Clonez ce dépôt.
+2. Créez un fichier `.env` à la racine avec le contenu suivant :
+   ```env
+   DISCORD_TOKEN=votre_token_discord_ici
+   DEEPSEEK_API_KEY=votre_cle_api_deepseek_ici
+   ```
+3. Installez les dépendances : `pip install discord.py python-dotenv openai`
+4. Lancez le bot : `python vibe_pilot.py`
+
+---
+
+
 ## 👤 Ce que VOUS pouvez faire (Utilisateur)
 
 L'interaction avec l'agent se fait principalement via Discord.
