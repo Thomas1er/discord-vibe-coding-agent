@@ -37,6 +37,7 @@ L'interaction avec l'agent se fait principalement via Discord.
 *   **`!vibe <instructions>`** : Lance l'agent avec une mission. 
     *   *Exemple :* `!vibe Crée un script python qui affiche l'heure, lance-le pour tester, et dis-moi si ça marche.`
     *   *Exemple 2 :* `!vibe Le dernier changement a tout cassé, reviens à la version précédente.`
+*   **Contourner la limite Discord (2000 caractères)** : Vous pouvez joindre un ou plusieurs fichiers `.txt` à votre message (avec ou sans texte accompagnant). L'agent lira automatiquement leur contenu pour comprendre vos instructions longues !
 *   **`!reset`** : Efface la mémoire de l'agent pour le salon Discord actuel. Très utile pour commencer un nouveau projet ou si l'agent s'emmêle les pinceaux avec le vieux contexte.
 
 ### 2. Interactions en cours d'exécution
